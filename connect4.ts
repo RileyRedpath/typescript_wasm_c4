@@ -6,9 +6,9 @@ export class GameState {
     constructor() {
         this.over = false;
         this.board = new Array(7);
-        for(var i = 0; i < 7; i++){
+        for (var i = 0; i < 7; i++) {
             this.board[i] = new Array(7);
-            for(var j = 0; j < 7; j++){
+            for (var j = 0; j < 7; j++) {
                 this.board[i][j] = Player.NONE;
             }
         }
@@ -30,22 +30,30 @@ export class GameState {
             }
         }
 
-        if(rowIndx === -1){
+        if (rowIndx === -1) {
             rowIndx = 0
             this.board[columnIndx][rowIndx] = this.turn;
         }
 
-        if (this.checkWon(columnIndx, rowIndx, this.turn)) {
+        if (new BoardInspector(this.board).checkWon(columnIndx, rowIndx, this.turn)) {
             this.over = true;
             return
         }
 
         this.turn = this.turn * -1;
     }
+}
 
+export class BoardInspector {
 
-    private checkWon(x: number, y: number, p: Player): boolean {
-        return this.checkVerticalFour(x, y, p) || this.checkHorizontalFour(x, y, p) || this.checkDiagonalFour(x,y,p);
+    board: Player[][];
+
+    constructor(_board: Player[][]) {
+        this.board = _board;
+    }
+
+    public checkWon(x: number, y: number, p: Player): boolean {
+        return this.checkVerticalFour(x, y, p) || this.checkHorizontalFour(x, y, p) || this.checkDiagonalFour(x, y, p);
     }
 
     private checkVerticalFour(x: number, y: number, p: Player): boolean {
@@ -63,7 +71,7 @@ export class GameState {
 
     //returns how many consecutive player p pieces to the dx of x
     private checkHorizontalRecurse(dx: number, x: number, y: number, p: Player): number {
-        if(this.onBoundary(x, dx == -1)){
+        if (this.onBoundary(x, dx == -1)) {
             return 0;
         }
         return this.board[x + dx][y] != p ? 0 : this.checkHorizontalRecurse(dx, x + dx, y, p) + 1;
@@ -75,16 +83,16 @@ export class GameState {
 
     private checkDiagonalFour(x: number, y: number, p: Player): boolean {
         var downLeft = (this.onBoundary(x, true) || this.onBoundary(y, true)) ? 0 : this.checkDiagonalRecurse(-1, -1, x, y, p);
-        var upLeft = (this.onBoundary(x, true) || this.onBoundary(y, false)) ? 0 :this.checkDiagonalRecurse(-1, 1, x, y, p);
+        var upLeft = (this.onBoundary(x, true) || this.onBoundary(y, false)) ? 0 : this.checkDiagonalRecurse(-1, 1, x, y, p);
         var downRight = (this.onBoundary(x, false) || this.onBoundary(y, true)) ? 0 : this.checkDiagonalRecurse(1, -1, x, y, p);
         var upRight = (this.onBoundary(x, false) || this.onBoundary(y, false)) ? 0 : this.checkDiagonalRecurse(1, 1, x, y, p);
 
-        return (downLeft + upRight + 1 > 3 || upLeft + downRight + 1 > 3 )
+        return (downLeft + upRight + 1 > 3 || upLeft + downRight + 1 > 3)
     }
 
     //returns how many  consecutive player p pieces to the (dx,dy) of (x,y)
     private checkDiagonalRecurse(dy: number, dx: number, x: number, y: number, p: Player): number {
-        if(this.onBoundary(x, dx == -1) || this.onBoundary(y, dy == -1)){
+        if (this.onBoundary(x, dx == -1) || this.onBoundary(y, dy == -1)) {
             return 0;
         }
         return this.board[x + dx][y + dy] != p ? 0 : this.checkDiagonalRecurse(dy, dx, x + dx, y + dy, p) + 1;

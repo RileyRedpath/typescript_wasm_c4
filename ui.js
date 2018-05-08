@@ -14,17 +14,16 @@ var draw = function () {
     ctx.canvas.height = window.innerHeight;
     var rectX = Math.round(canvas.width / 7);
     var rectY = Math.round(canvas.height / 7);
-    ctx.fillStyle = '#232323';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
     for (var i = 0; i < 7; i++) {
         for (var j = 0; j < 7; j++) {
             setFillStyleForPlayer(gameState.board[i][j], ctx);
-            ctx.fillRect(i * rectX, (6 - j) * rectY, rectX, rectY);
+            ctx.fillRect(i * rectX - 1, (6 - j) * rectY - 1, rectX - 2, rectY - 2);
         }
     }
 };
-window.addEventListener('keydown', function (k) {
-    gameState.dropPiece(Number(k.key));
+window.addEventListener('click', function (c) {
+    var column = Math.floor(c.clientX / Math.round(canvas.width / 7));
+    gameState.dropPiece(column);
     draw();
     if (gameState.over) {
         console.log('game over');

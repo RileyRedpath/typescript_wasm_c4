@@ -30,36 +30,43 @@ var GameState = /** @class */ (function () {
             rowIndx = 0;
             this.board[columnIndx][rowIndx] = this.turn;
         }
-        if (this.checkWon(columnIndx, rowIndx, this.turn)) {
+        if (new BoardInspector(this.board).checkWon(columnIndx, rowIndx, this.turn)) {
             this.over = true;
             return;
         }
         this.turn = this.turn * -1;
     };
-    GameState.prototype.checkWon = function (x, y, p) {
+    return GameState;
+}());
+exports.GameState = GameState;
+var BoardInspector = /** @class */ (function () {
+    function BoardInspector(_board) {
+        this.board = _board;
+    }
+    BoardInspector.prototype.checkWon = function (x, y, p) {
         return this.checkVerticalFour(x, y, p) || this.checkHorizontalFour(x, y, p) || this.checkDiagonalFour(x, y, p);
     };
-    GameState.prototype.checkVerticalFour = function (x, y, p) {
+    BoardInspector.prototype.checkVerticalFour = function (x, y, p) {
         return y > 2 && this.board[x][y - 1] == p
             && this.board[x][y - 2] == p
             && this.board[x][y - 3] == p;
     };
-    GameState.prototype.checkHorizontalFour = function (x, y, p) {
+    BoardInspector.prototype.checkHorizontalFour = function (x, y, p) {
         var left = this.onBoundary(x, true) ? 0 : this.checkHorizontalRecurse(-1, x, y, p);
         var right = this.onBoundary(x, false) ? 0 : this.checkHorizontalRecurse(1, x, y, p);
         return left + right + 1 > 3;
     };
     //returns how many consecutive player p pieces to the dx of x
-    GameState.prototype.checkHorizontalRecurse = function (dx, x, y, p) {
+    BoardInspector.prototype.checkHorizontalRecurse = function (dx, x, y, p) {
         if (this.onBoundary(x, dx == -1)) {
             return 0;
         }
         return this.board[x + dx][y] != p ? 0 : this.checkHorizontalRecurse(dx, x + dx, y, p) + 1;
     };
-    GameState.prototype.onBoundary = function (n, left) {
+    BoardInspector.prototype.onBoundary = function (n, left) {
         return left ? (n < 1) : (n > 5);
     };
-    GameState.prototype.checkDiagonalFour = function (x, y, p) {
+    BoardInspector.prototype.checkDiagonalFour = function (x, y, p) {
         var downLeft = (this.onBoundary(x, true) || this.onBoundary(y, true)) ? 0 : this.checkDiagonalRecurse(-1, -1, x, y, p);
         var upLeft = (this.onBoundary(x, true) || this.onBoundary(y, false)) ? 0 : this.checkDiagonalRecurse(-1, 1, x, y, p);
         var downRight = (this.onBoundary(x, false) || this.onBoundary(y, true)) ? 0 : this.checkDiagonalRecurse(1, -1, x, y, p);
@@ -67,15 +74,15 @@ var GameState = /** @class */ (function () {
         return (downLeft + upRight + 1 > 3 || upLeft + downRight + 1 > 3);
     };
     //returns how many  consecutive player p pieces to the (dx,dy) of (x,y)
-    GameState.prototype.checkDiagonalRecurse = function (dy, dx, x, y, p) {
+    BoardInspector.prototype.checkDiagonalRecurse = function (dy, dx, x, y, p) {
         if (this.onBoundary(x, dx == -1) || this.onBoundary(y, dy == -1)) {
             return 0;
         }
         return this.board[x + dx][y + dy] != p ? 0 : this.checkDiagonalRecurse(dy, dx, x + dx, y + dy, p) + 1;
     };
-    return GameState;
+    return BoardInspector;
 }());
-exports.GameState = GameState;
+exports.BoardInspector = BoardInspector;
 var Player;
 (function (Player) {
     Player[Player["PLAYER1"] = -1] = "PLAYER1";
@@ -100,17 +107,16 @@ var draw = function () {
     ctx.canvas.height = window.innerHeight;
     var rectX = Math.round(canvas.width / 7);
     var rectY = Math.round(canvas.height / 7);
-    ctx.fillStyle = '#232323';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
     for (var i = 0; i < 7; i++) {
         for (var j = 0; j < 7; j++) {
             setFillStyleForPlayer(gameState.board[i][j], ctx);
-            ctx.fillRect(i * rectX, (6 - j) * rectY, rectX, rectY);
+            ctx.fillRect(i * rectX - 1, (6 - j) * rectY - 1, rectX - 2, rectY - 2);
         }
     }
 };
-window.addEventListener('keydown', function (k) {
-    gameState.dropPiece(Number(k.key));
+window.addEventListener('click', function (c) {
+    var column = Math.floor(c.clientX / Math.round(canvas.width / 7));
+    gameState.dropPiece(column);
     draw();
     if (gameState.over) {
         console.log('game over');
