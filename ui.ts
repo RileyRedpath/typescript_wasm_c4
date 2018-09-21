@@ -2,6 +2,10 @@ import {GameState} from "./connect4";
 import {Player} from "./connect4";
 import {AI} from "./ai";
 
+console.log("can you hear me?");
+
+const minimax = import("./rustyAI");
+
 var gameState = new GameState();
 
 const canvas = <HTMLCanvasElement>document.getElementById('canvas');
@@ -28,8 +32,11 @@ const draw = () => {
     }
 }
 
+console.log("fuck you!")
+
 window.addEventListener('click', c => {
     var column = Math.floor(c.clientX / Math.round(canvas.width / 7));
+    console.log("piece dropped: " + column);
     gameState.dropPiece(column);
     draw();
     if(gameState.over){
@@ -37,8 +44,29 @@ window.addEventListener('click', c => {
         setFillStyleForPlayer(gameState.turn, ctx);
         ctx.fillRect(0, 0, canvas.width, canvas.height)
         gameState = new GameState();
-    }   
-})
+    }
+});
+
+window.addEventListener("keypress", evt =>{
+    if(evt.key === "a"){
+        console.log("calculating best move");
+        import("./rustyAI").then( m => {
+            console.log("inside then ");
+            var board1D = gameState.boardAs1d();
+            console.log("1d board created")
+            console.log("best move: " + m.minimax_setup(board1D, gameState.turn));
+        });
+    }else if(evt.key === "q"){
+        import("./rustyAI").then( m => {
+            m.log_test();
+        });
+    }
+    else if(evt.key === "s"){
+        import("./rustyAI").then( m => {
+            console.log("3 + 1 = " + m.add(3,1));
+        });
+    }
+});
 
 draw();
 

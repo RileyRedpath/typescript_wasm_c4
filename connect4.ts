@@ -42,6 +42,26 @@ export class GameState {
 
         this.turn = this.turn * -1;
     }
+
+    public boardAs1d(): Int32Array{
+        console.log("creating array");
+        var vec = [];
+        for(var i = 0; i < 7; i++){
+            for(var j = 0; j < 7; j++){
+
+                var place = this.board[i][j];
+                if(place === Player.PLAYER1){
+                    vec.push(1);
+                }else if(place === Player.PLAYER2){
+                    vec.push(-1);
+                }else{
+                    vec.push(0);
+                }
+            }
+        }
+        console.log("array created");
+        return new Int32Array(vec);
+    }
 }
 
 export class BoardInspector {
@@ -100,7 +120,7 @@ export class BoardInspector {
 }
 
 export enum Player {
-    PLAYER1 = -1,
+    PLAYER1 = 1,
     NONE = 0,
-    PLAYER2 = 1,
+    PLAYER2 = -1,
 }
